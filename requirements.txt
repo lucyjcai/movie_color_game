@@ -1,0 +1,13 @@
+"""
+INSTALL THESE WITH:
+pip install -r requirements.txt
+
+ALSO RUN:
+brew install cliclick
+
+ALSO INSTALL:
+Video Screenshot Chrome Extension
+"""
+
+Pillow>=10.0.0
+numpy>=1.24.0
