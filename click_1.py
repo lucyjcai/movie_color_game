@@ -10,6 +10,7 @@ import sys
 X = 1150
 Y = 838
 first = True
+min_between_each_frame = 1
 
 if len(sys.argv) != 2:
     print("Usage: python click_1.py <minutes>")
@@ -17,6 +18,8 @@ if len(sys.argv) != 2:
 
 minutes = float(sys.argv[1])
 end_time = time.time() + minutes * 60
+
+print(f"This script will capture {minutes//min_between_each_frame} frames.\n")
 
 time.sleep(10)
 
@@ -31,7 +34,7 @@ while time.time() < end_time:
     time.sleep(1)
     subprocess.run(["cliclick", f"c:{X},{Y}"])
 
-    time.sleep(79)
+    time.sleep(min_between_each_frame*60/1.5-1)
     first = False
 
 print("Done.")
