@@ -1,0 +1,9 @@
+{
+  "name": "movie-color-game",
+  "version": "1.0.0",
+  "description": "A daily movie guessing game based on color palettes",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}

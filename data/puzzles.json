@@ -1,0 +1,25 @@
+{
+  "startDate": "2025-12-30",
+  "puzzles": [
+    {
+      "id": 1,
+      "movieTitle": "In the Mood for Love",
+      "imageFilename": "strip_1.png",
+      "wrongAnswers": [
+        "Lost in Translation",
+        "Amélie",
+        "The Grand Budapest Hotel"
+      ]
+    },
+    {
+      "id": 2,
+      "movieTitle": "The Martian",
+      "imageFilename": "strip_2.png",
+      "wrongAnswers": [
+        "Interstellar",
+        "Gravity",
+        "Apollo 13"
+      ]
+    }
+  ]
+}

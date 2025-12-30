@@ -1,0 +1,15 @@
+# Python scripts (not needed for deployment)
+*.py
+requirements.txt
+
+# Git files
+.git/
+.gitignore
+
+# macOS files
+.DS_Store
+
+# Local development
+node_modules/
+.env
+.env.local

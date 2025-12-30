@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Color Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Movie Color Game</h1>
+            <p class="subtitle">Guess the movie from its color palette</p>
+        </header>
+
+        <main id="game-container">
+            <div id="loading" class="loading">
+                <p>Loading today's puzzle...</p>
+            </div>
+
+            <div id="already-played" class="message hidden">
+                <h2>You've already played today!</h2>
+                <p>Come back tomorrow for a new puzzle.</p>
+            </div>
+
+            <div id="no-puzzle" class="message hidden">
+                <h2>No puzzle available</h2>
+                <p>Check back soon for a new puzzle!</p>
+            </div>
+
+            <div id="error" class="message hidden">
+                <h2>Oops! Something went wrong</h2>
+                <p>Please try again later.</p>
+            </div>
+
+            <div id="game" class="hidden">
+                <div class="color-strip-container">
+                    <img id="color-strip" src="" alt="Movie color strip">
+                </div>
+
+                <div id="options-container" class="options-container">
+                    <button class="option-btn" data-answer=""></button>
+                    <button class="option-btn" data-answer=""></button>
+                    <button class="option-btn" data-answer=""></button>
+                    <button class="option-btn" data-answer=""></button>
+                </div>
+
+                <div id="result" class="result hidden">
+                    <p id="result-message"></p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>A new puzzle every day</p>
+        </footer>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
