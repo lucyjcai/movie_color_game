@@ -1,6 +1,6 @@
 """
 RUN WITH:
-python compile_4.py <movie_name>
+python compile_4.py <folder_name>
 """
 
 from pathlib import Path
@@ -9,10 +9,9 @@ import numpy as np
 import sys
 
 # ---- Config ----
-STRIP_WIDTH = 12     # width (px) of each vertical color bar
-STRIP_HEIGHT = 250   # height (px) of the final strip image
+STRIP_WIDTH = 10     # width (px) of each vertical color bar
+STRIP_HEIGHT = 750   # height (px) of the final strip image
 
-DOWNSAMPLE_TO = (64, 64)  # speed-up for averaging; set to None to disable
 VALID_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".webp"}
 # ----------------
 
@@ -20,8 +19,6 @@ VALID_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".webp"}
 def avg_rgb(image_path: Path) -> tuple[int, int, int]:
     with Image.open(image_path) as img:
         img = img.convert("RGB")
-        if DOWNSAMPLE_TO is not None:
-            img = img.resize(DOWNSAMPLE_TO)
 
         arr = np.asarray(img, dtype=np.float32)
         mean = arr.mean(axis=(0, 1))  # (R, G, B)
@@ -30,7 +27,7 @@ def avg_rgb(image_path: Path) -> tuple[int, int, int]:
 
 def main():
     if len(sys.argv) != 2:
-        print("Usage: python compile_4.py <movie_name>")
+        print("Usage: python compile_4.py <folder_name>")
         sys.exit(1)
 
     movie_name = sys.argv[1]

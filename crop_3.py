@@ -1,6 +1,6 @@
 """
 RUN WITH:
-python crop_3.py <folder_name>
+python crop_3.py <folder_name> <num_pixels_to_crop>
 """
 
 
@@ -8,14 +8,17 @@ from pathlib import Path
 from PIL import Image
 import sys
 
-TOP_CROP = 215
-BOTTOM_CROP = 215
 VALID_EXTS = {".png", ".jpg", ".jpeg"}
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python crop_3.py <folder_name>")
+    if len(sys.argv) != 3:
+        print("Usage: python crop_3.py <folder_name> <num_pixels_to_crop>")
+        sys.exit(1)
+
+    crop_pixels = int(sys.argv[2])
+    if type(crop_pixels) != int:
+        print(f"Number of pixels to crop must be an int")
         sys.exit(1)
 
     folder_name = sys.argv[1]
@@ -31,11 +34,11 @@ def main():
 
         with Image.open(img_path) as img:
             w, h = img.size
-            if h <= TOP_CROP + BOTTOM_CROP:
+            if h <= crop_pixels * 2:
                 print(f"Skipping {img_path.name}: image too short")
                 continue
 
-            cropped = img.crop((0, TOP_CROP, w, h - BOTTOM_CROP))
+            cropped = img.crop((0, crop_pixels, w, h - crop_pixels))
             cropped.save(img_path)
 
             print(f"Cropped {img_path.name}")
