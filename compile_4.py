@@ -10,7 +10,7 @@ import sys
 
 # ---- Config ----
 STRIP_WIDTH = 10     # width (px) of each vertical color bar
-STRIP_HEIGHT = 750   # height (px) of the final strip image
+STRIP_HEIGHT = 250   # height (px) of the final strip image
 
 VALID_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".webp"}
 # ----------------

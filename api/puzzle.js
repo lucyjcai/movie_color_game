@@ -7,19 +7,25 @@ module.exports = (req, res) => {
     const dataPath = path.join(process.cwd(), 'data', 'puzzles.json');
     const puzzleData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 
-    // Calculate today's puzzle index
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Get date from query parameter or use today
+    let targetDate;
+    if (req.query.date) {
+      targetDate = new Date(req.query.date);
+      targetDate.setHours(0, 0, 0, 0);
+    } else {
+      targetDate = new Date();
+      targetDate.setHours(0, 0, 0, 0);
+    }
 
     const startDate = new Date(puzzleData.startDate);
     startDate.setHours(0, 0, 0, 0);
 
-    const daysSinceStart = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+    const daysSinceStart = Math.floor((targetDate - startDate) / (1000 * 60 * 60 * 24));
 
-    // Check if puzzle exists for today
+    // Check if puzzle exists for the requested date
     if (daysSinceStart < 0 || daysSinceStart >= puzzleData.puzzles.length) {
       return res.status(404).json({
-        error: 'No puzzle available for today',
+        error: 'No puzzle available for this date',
         message: 'Check back soon for a new puzzle!'
       });
     }
@@ -33,7 +39,7 @@ module.exports = (req, res) => {
     // Return puzzle
     res.status(200).json({
       puzzleId: puzzle.id,
-      date: today.toISOString().split('T')[0],
+      date: targetDate.toISOString().split('T')[0],
       imageUrl: `/images/${puzzle.imageFilename}`,
       options: options,
       correctAnswer: puzzle.movieTitle
