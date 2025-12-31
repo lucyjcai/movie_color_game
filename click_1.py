@@ -8,7 +8,7 @@ import time
 import sys
 
 first = True
-min_between_each_frame = 0.4
+TARGET_FRAMES = 200
 
 if len(sys.argv) != 3:
     print("Usage: python click_1.py <minutes> <streaming_service>")
@@ -16,6 +16,7 @@ if len(sys.argv) != 3:
 
 minutes = float(sys.argv[1])
 service = sys.argv[2]
+min_between_each_frame = minutes / TARGET_FRAMES
 if service not in ["NETFLIX", "HBOMAX"]:
     print("Streaming service not recognized!")
     sys.exit(1)

@@ -186,6 +186,29 @@ h1 {
     border: 2px solid #b59f3b;
 }
 
+/* Share Button */
+.share-btn {
+    margin-top: 16px;
+    background-color: #538d4e;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.share-btn:hover {
+    background-color: #466c42;
+    transform: scale(1.02);
+}
+
+.share-btn:active {
+    transform: scale(0.98);
+}
+
 /* Footer */
 footer {
     margin-top: 40px;
@@ -236,7 +259,7 @@ footer {
     background-color: #ffffff;
     padding: 24px;
     border-radius: 12px;
-    max-width: 400px;
+    max-width: 600px;
     width: 90%;
     max-height: 80vh;
     overflow-y: auto;
@@ -277,44 +300,81 @@ footer {
 }
 
 .calendar-grid {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
     gap: 8px;
+}
+
+.calendar-header {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6b6b6b;
+    text-align: center;
+    padding: 8px 0;
 }
 
 .calendar-day {
     border: 2px solid #d3d6da;
-    border-radius: 4px;
+    border-radius: 6px;
     background-color: #ffffff;
     cursor: pointer;
-    font-size: 0.95rem;
-    font-weight: 600;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 16px;
+    padding: 12px 8px;
     transition: all 0.2s ease;
+    position: relative;
+    min-height: 70px;
 }
 
-.calendar-day:hover:not(.disabled) {
+.calendar-day.empty {
+    border: none;
+    background: transparent;
+    cursor: default;
+}
+
+.calendar-day:hover:not(.future):not(.empty) {
     background-color: #f5f5f5;
     border-color: #878a8c;
+    transform: scale(1.05);
 }
 
-.calendar-day.disabled {
+.calendar-day.future {
     opacity: 0.3;
     cursor: not-allowed;
 }
 
 .calendar-day.today {
-    background-color: #538d4e;
-    color: #ffffff;
     border-color: #538d4e;
+    border-width: 3px;
+    background-color: #f0f7ee;
 }
 
-.calendar-day.played {
+.puzzle-number {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1a1a1b;
+    margin-bottom: 4px;
+}
+
+.date-display {
+    font-size: 0.7rem;
+    color: #6b6b6b;
+    text-align: center;
+}
+
+.status-indicator {
+    position: absolute;
+    bottom: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
     background-color: #d3d6da;
-    border-color: #878a8c;
+}
+
+.status-indicator.played {
+    background-color: #538d4e;
 }
 
 /* Responsive Design */
@@ -339,5 +399,27 @@ footer {
     .calendar-btn svg {
         width: 20px;
         height: 20px;
+    }
+
+    .calendar-grid {
+        gap: 6px;
+    }
+
+    .calendar-day {
+        min-height: 60px;
+        padding: 8px 4px;
+    }
+
+    .puzzle-number {
+        font-size: 0.75rem;
+    }
+
+    .date-display {
+        font-size: 0.65rem;
+    }
+
+    .calendar-header {
+        font-size: 0.7rem;
+        padding: 6px 0;
     }
 }

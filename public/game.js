@@ -19,10 +19,12 @@ const calendarModal = document.getElementById('calendar-modal');
 const closeModal = document.getElementById('close-modal');
 const calendarGrid = document.getElementById('calendar-grid');
 const puzzleDateDisplay = document.getElementById('puzzle-date');
+const shareBtn = document.getElementById('share-btn');
 
 let currentPuzzle = null;
 let hasAnswered = false;
 let currentDate = null;
+let guessCount = 0;
 
 // Initialize game
 async function init() {
@@ -36,6 +38,9 @@ async function init() {
             closeCalendarModal();
         }
     });
+
+    // Set up share button listener
+    shareBtn.addEventListener('click', shareResults);
 
     // Fetch metadata first
     try {
@@ -85,11 +90,13 @@ async function loadPuzzle(date = null) {
         if (savedResult) {
             // Render in completed state
             hasAnswered = true;
+            guessCount = savedResult.guessCount || 1;
             renderGame(puzzle);
             renderCompletedState(savedResult);
         } else {
             // Render fresh puzzle
             hasAnswered = false;
+            guessCount = 0;
             renderGame(puzzle);
             result.classList.remove('correct-result', 'wrong-result');
             hideElement(result);
@@ -143,26 +150,33 @@ function renderGame(puzzle) {
 function handleAnswer(selectedAnswer) {
     if (hasAnswered) return;
 
-    hasAnswered = true;
+    guessCount++;
     const isCorrect = selectedAnswer === currentPuzzle.correctAnswer;
 
-    // Save result
-    const result = {
-        selectedAnswer: selectedAnswer,
-        correctAnswer: currentPuzzle.correctAnswer,
-        isCorrect: isCorrect
-    };
+    if (isCorrect) {
+        // Correct answer - end the game
+        hasAnswered = true;
+        const result = {
+            selectedAnswer: selectedAnswer,
+            correctAnswer: currentPuzzle.correctAnswer,
+            isCorrect: isCorrect,
+            guessCount: guessCount
+        };
 
-    // Render completed state
-    renderCompletedState(result);
+        // Render completed state
+        renderCompletedState(result);
 
-    // Mark as played and save result
-    savePuzzleResult(currentDate, result);
+        // Mark as played and save result
+        savePuzzleResult(currentDate, result);
+    } else {
+        // Wrong answer - show feedback but allow more guesses
+        showIncorrectFeedback(selectedAnswer);
+    }
 }
 
 // Render puzzle in completed state
 function renderCompletedState(savedResult) {
-    const { selectedAnswer, correctAnswer, isCorrect } = savedResult;
+    const { selectedAnswer, correctAnswer, isCorrect, guessCount } = savedResult;
 
     // Disable all buttons and apply styles
     const buttons = optionsContainer.querySelectorAll('.option-btn');
@@ -179,20 +193,85 @@ function renderCompletedState(savedResult) {
     });
 
     // Show result
-    showResult(isCorrect);
+    showResult(isCorrect, guessCount || 1);
+}
+
+// Show incorrect feedback (doesn't end the game)
+function showIncorrectFeedback(selectedAnswer) {
+    // Temporarily disable the wrong button and mark it
+    const buttons = optionsContainer.querySelectorAll('.option-btn');
+    buttons.forEach(btn => {
+        if (btn.dataset.answer === selectedAnswer) {
+            btn.classList.add('wrong');
+            btn.disabled = true;
+        }
+    });
+
+    // Show temporary feedback message
+    resultMessage.textContent = 'Incorrect! Try again.';
+    result.classList.remove('correct-result');
+    result.classList.add('wrong-result');
+    hideElement(shareBtn);
+    showElement(result);
 }
 
 // Show result message
-function showResult(isCorrect) {
+function showResult(isCorrect, guessCount) {
     if (isCorrect) {
-        resultMessage.textContent = 'Correct! Well done!';
+        const guessText = guessCount === 1 ? '1 guess' : `${guessCount} guesses`;
+        resultMessage.textContent = `Correct! You got it in ${guessText}!`;
         result.classList.add('correct-result');
+        showElement(shareBtn);
     } else {
         resultMessage.textContent = `Wrong! The correct answer was "${currentPuzzle.correctAnswer}".`;
         result.classList.add('wrong-result');
+        hideElement(shareBtn);
     }
 
     showElement(result);
+}
+
+// Share results
+async function shareResults() {
+    const savedResult = getPuzzleResult(currentDate);
+    if (!savedResult || !savedResult.isCorrect) return;
+
+    const { guessCount } = savedResult;
+
+    // Generate emoji pattern: red squares for wrong guesses, green for correct
+    const wrongGuesses = guessCount - 1;
+    const emojiPattern = '🟥'.repeat(wrongGuesses) + '🟩';
+
+    // Format the date nicely
+    const date = createLocalDate(currentDate);
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+    const dateStr = `${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+
+    const guessText = guessCount === 1 ? '1 guess' : `${guessCount} guesses`;
+    const shareText = `Movie Color Game - ${dateStr}\n🎬 Got it in ${guessText}!\n${emojiPattern}\n\nPlay at: ${window.location.origin}`;
+
+    try {
+        // Try to use Web Share API if available (mobile devices)
+        if (navigator.share) {
+            await navigator.share({
+                text: shareText
+            });
+        } else {
+            // Fall back to clipboard
+            await navigator.clipboard.writeText(shareText);
+
+            // Show visual feedback
+            const originalText = shareBtn.textContent;
+            shareBtn.textContent = 'Copied!';
+            setTimeout(() => {
+                shareBtn.textContent = originalText;
+            }, 2000);
+        }
+    } catch (error) {
+        // Silently fail if user cancels share or clipboard fails
+        console.log('Share cancelled or failed:', error);
+    }
 }
 
 // LocalStorage functions
@@ -260,40 +339,79 @@ function generateCalendar() {
     today.setHours(0, 0, 0, 0);
     const startDate = createLocalDate(START_DATE);
 
-    // Calculate available dates
+    // Add day headers
+    const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    dayNames.forEach(day => {
+        const headerElement = document.createElement('div');
+        headerElement.classList.add('calendar-header');
+        headerElement.textContent = day;
+        calendarGrid.appendChild(headerElement);
+    });
+
+    // Get the first puzzle date and find what day of the week it starts on
+    const firstPuzzleDate = new Date(startDate);
+    const firstDayOfWeek = firstPuzzleDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+    // Add empty cells for days before the first puzzle
+    for (let i = 0; i < firstDayOfWeek; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.classList.add('calendar-day', 'empty');
+        calendarGrid.appendChild(emptyCell);
+    }
+
+    // Add puzzle days
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
     for (let i = 0; i < NUM_PUZZLES; i++) {
         const puzzleDate = new Date(startDate);
         puzzleDate.setDate(startDate.getDate() + i);
-
-        // Only show dates up to today
-        if (puzzleDate > today) {
-            break;
-        }
 
         const dateStr = puzzleDate.toISOString().split('T')[0];
         const dayElement = document.createElement('button');
         dayElement.classList.add('calendar-day');
 
-        // Format as "Dec 29"
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        // Check if this date is in the future
+        if (puzzleDate > today) {
+            dayElement.classList.add('future');
+            dayElement.disabled = true;
+        }
+
+        // Create puzzle number
+        const puzzleNumber = document.createElement('div');
+        puzzleNumber.classList.add('puzzle-number');
+        puzzleNumber.textContent = `#${i + 1}`;
+
+        // Create date display
+        const dateDisplay = document.createElement('div');
+        dateDisplay.classList.add('date-display');
         const monthAbbr = monthNames[puzzleDate.getMonth()];
-        dayElement.textContent = `${monthAbbr} ${puzzleDate.getDate()}`;
+        dateDisplay.textContent = `${monthAbbr} ${puzzleDate.getDate()}`;
+
+        dayElement.appendChild(puzzleNumber);
+        dayElement.appendChild(dateDisplay);
 
         // Mark today
         if (dateStr === getTodayDate()) {
             dayElement.classList.add('today');
         }
 
-        // Mark played dates
-        if (hasPlayedDate(dateStr)) {
-            dayElement.classList.add('played');
+        // Add status indicator
+        if (puzzleDate <= today) {
+            const indicator = document.createElement('div');
+            indicator.classList.add('status-indicator');
+            if (hasPlayedDate(dateStr)) {
+                indicator.classList.add('played');
+            }
+            dayElement.appendChild(indicator);
         }
 
-        dayElement.addEventListener('click', () => {
-            closeCalendarModal();
-            loadPuzzle(dateStr);
-        });
+        if (puzzleDate <= today) {
+            dayElement.addEventListener('click', () => {
+                closeCalendarModal();
+                loadPuzzle(dateStr);
+            });
+        }
 
         calendarGrid.appendChild(dayElement);
     }
