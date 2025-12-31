@@ -186,9 +186,16 @@ h1 {
     border: 2px solid #b59f3b;
 }
 
-/* Share Button */
-.share-btn {
+/* Share Buttons */
+.share-buttons {
     margin-top: 16px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.share-btn {
     background-color: #538d4e;
     color: #ffffff;
     border: none;
@@ -198,11 +205,21 @@ h1 {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    flex: 1;
+    min-width: 140px;
+}
+
+.share-btn.secondary {
+    background-color: #818384;
 }
 
 .share-btn:hover {
     background-color: #466c42;
     transform: scale(1.02);
+}
+
+.share-btn.secondary:hover {
+    background-color: #565758;
 }
 
 .share-btn:active {
@@ -421,5 +438,13 @@ footer {
     .calendar-header {
         font-size: 0.7rem;
         padding: 6px 0;
+    }
+
+    .share-buttons {
+        flex-direction: column;
+    }
+
+    .share-btn {
+        min-width: 100%;
     }
 }

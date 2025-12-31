@@ -19,6 +19,8 @@ const calendarModal = document.getElementById('calendar-modal');
 const closeModal = document.getElementById('close-modal');
 const calendarGrid = document.getElementById('calendar-grid');
 const puzzleDateDisplay = document.getElementById('puzzle-date');
+const shareButtons = document.getElementById('share-buttons');
+const copyBtn = document.getElementById('copy-btn');
 const shareBtn = document.getElementById('share-btn');
 
 let currentPuzzle = null;
@@ -39,8 +41,14 @@ async function init() {
         }
     });
 
-    // Set up share button listener
-    shareBtn.addEventListener('click', shareResults);
+    // Set up share button listeners
+    copyBtn.addEventListener('click', copyToClipboard);
+    shareBtn.addEventListener('click', shareViaWebAPI);
+
+    // Show Web Share button only if API is available
+    if (navigator.share) {
+        shareBtn.classList.remove('hidden');
+    }
 
     // Fetch metadata first
     try {
@@ -211,7 +219,7 @@ function showIncorrectFeedback(selectedAnswer) {
     resultMessage.textContent = 'Incorrect! Try again.';
     result.classList.remove('correct-result');
     result.classList.add('wrong-result');
-    hideElement(shareBtn);
+    hideElement(shareButtons);
     showElement(result);
 }
 
@@ -221,20 +229,20 @@ function showResult(isCorrect, guessCount) {
         const guessText = guessCount === 1 ? '1 guess' : `${guessCount} guesses`;
         resultMessage.textContent = `Correct! You got it in ${guessText}!`;
         result.classList.add('correct-result');
-        showElement(shareBtn);
+        showElement(shareButtons);
     } else {
         resultMessage.textContent = `Wrong! The correct answer was "${currentPuzzle.correctAnswer}".`;
         result.classList.add('wrong-result');
-        hideElement(shareBtn);
+        hideElement(shareButtons);
     }
 
     showElement(result);
 }
 
-// Share results
-async function shareResults() {
+// Generate share text
+function generateShareText() {
     const savedResult = getPuzzleResult(currentDate);
-    if (!savedResult || !savedResult.isCorrect) return;
+    if (!savedResult || !savedResult.isCorrect) return null;
 
     const { guessCount } = savedResult;
 
@@ -249,28 +257,42 @@ async function shareResults() {
     const dateStr = `${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 
     const guessText = guessCount === 1 ? '1 guess' : `${guessCount} guesses`;
-    const shareText = `Movie Color Game - ${dateStr}\n🎬 Got it in ${guessText}!\n${emojiPattern}\n\nPlay at: ${window.location.origin}`;
+    return `Gradient - ${dateStr}\n🎬 Got it in ${guessText}!\n${emojiPattern}\n\nPlay at: ${window.location.origin}`;
+}
+
+// Copy to clipboard
+async function copyToClipboard() {
+    const shareText = generateShareText();
+    if (!shareText) return;
 
     try {
-        // Try to use Web Share API if available (mobile devices)
-        if (navigator.share) {
-            await navigator.share({
-                text: shareText
-            });
-        } else {
-            // Fall back to clipboard
-            await navigator.clipboard.writeText(shareText);
+        await navigator.clipboard.writeText(shareText);
 
-            // Show visual feedback
-            const originalText = shareBtn.textContent;
-            shareBtn.textContent = 'Copied!';
-            setTimeout(() => {
-                shareBtn.textContent = originalText;
-            }, 2000);
-        }
+        // Show visual feedback
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => {
+            copyBtn.textContent = originalText;
+        }, 2000);
     } catch (error) {
-        // Silently fail if user cancels share or clipboard fails
-        console.log('Share cancelled or failed:', error);
+        console.log('Clipboard write failed:', error);
+        // Fallback: show alert with text to copy manually
+        alert('Copy this:\n\n' + shareText);
+    }
+}
+
+// Share via Web Share API
+async function shareViaWebAPI() {
+    const shareText = generateShareText();
+    if (!shareText) return;
+
+    try {
+        await navigator.share({
+            text: shareText
+        });
+    } catch (error) {
+        // Silently fail if user cancels share
+        console.log('Share cancelled:', error);
     }
 }
 
