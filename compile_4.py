@@ -9,8 +9,8 @@ import numpy as np
 import sys
 
 # ---- Config ----
-STRIP_WIDTH = 10     # width (px) of each vertical color bar
-STRIP_HEIGHT = 250   # height (px) of the final strip image
+STRIP_WIDTH = 5     # width (px) of each vertical color bar
+STRIP_HEIGHT = 180   # height (px) of the final strip image
 
 VALID_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".webp"}
 # ----------------
@@ -38,11 +38,12 @@ def main():
     if not input_dir.exists() or not input_dir.is_dir():
         raise FileNotFoundError(f"Folder not found: {input_dir}")
 
-    # Sorted order: works well for names like frame_0001.png, 0001.png, etc.
+    # Sort by file modification time (oldest to newest)
     image_paths = sorted(
-        p for p in input_dir.iterdir()
-        if p.suffix.lower() in VALID_EXTS
+        (p for p in input_dir.iterdir() if p.suffix.lower() in VALID_EXTS),
+        key=lambda p: p.stat().st_mtime
     )
+    print(image_paths)
 
     if not image_paths:
         raise RuntimeError(f"No images found in {input_dir}")

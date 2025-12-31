@@ -20,6 +20,16 @@
         "The Godfather (1972)",
         "There Will be Blood (2007)"
       ]
+    },
+    {
+      "id": 3,
+      "movieTitle": "Past Lives (2023)",
+      "imageFilename": "strip_3.png",
+      "wrongAnswers": [
+        "Burning (2018)",
+        "Perfect Days (2023)",
+        "Memories of Murder (2003)"
+      ]
     }
   ]
 }

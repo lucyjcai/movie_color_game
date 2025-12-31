@@ -8,7 +8,7 @@ import time
 import sys
 
 first = True
-min_between_each_frame = 0.5
+min_between_each_frame = 0.4
 
 if len(sys.argv) != 3:
     print("Usage: python click_1.py <minutes> <streaming_service>")

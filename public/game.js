@@ -1,6 +1,8 @@
 const STORAGE_KEY = 'movieColorGame';
-const START_DATE = '2025-12-29';
-const NUM_PUZZLES = 2;
+
+// Metadata (will be fetched from API)
+let START_DATE = null;
+let NUM_PUZZLES = 0;
 
 // DOM elements
 const loading = document.getElementById('loading');
@@ -35,15 +37,29 @@ async function init() {
         }
     });
 
-    // Check if already played today
-    if (hasPlayedDate(currentDate)) {
-        showElement(alreadyPlayed);
-        hideElement(loading);
-        return;
+    // Fetch metadata first
+    try {
+        const metadata = await fetchMetadata();
+        START_DATE = metadata.startDate;
+        NUM_PUZZLES = metadata.totalPuzzles;
+    } catch (error) {
+        console.error('Failed to load metadata:', error);
+        // Fallback to defaults if metadata fails
+        START_DATE = '2025-12-29';
+        NUM_PUZZLES = 3;
     }
 
-    // Fetch today's puzzle
+    // Load today's puzzle (will show completed state if already played)
     await loadPuzzle();
+}
+
+// Fetch metadata from API
+async function fetchMetadata() {
+    const response = await fetch('/api/metadata');
+    if (!response.ok) {
+        throw new Error('Failed to fetch metadata');
+    }
+    return await response.json();
 }
 
 // Load puzzle for current date
@@ -55,9 +71,6 @@ async function loadPuzzle(date = null) {
         currentPuzzle = puzzle;
         currentDate = puzzleDate;
 
-        // Reset game state
-        hasAnswered = false;
-
         // Hide all messages
         hideElement(alreadyPlayed);
         hideElement(noPuzzle);
@@ -67,13 +80,22 @@ async function loadPuzzle(date = null) {
         // Update date display
         updateDateDisplay(puzzleDate);
 
-        // Render and show game
-        renderGame(puzzle);
-        showElement(game);
+        // Check if this puzzle was already played
+        const savedResult = getPuzzleResult(puzzleDate);
+        if (savedResult) {
+            // Render in completed state
+            hasAnswered = true;
+            renderGame(puzzle);
+            renderCompletedState(savedResult);
+        } else {
+            // Render fresh puzzle
+            hasAnswered = false;
+            renderGame(puzzle);
+            result.classList.remove('correct-result', 'wrong-result');
+            hideElement(result);
+        }
 
-        // Reset result display
-        result.classList.remove('correct-result', 'wrong-result');
-        hideElement(result);
+        showElement(game);
 
     } catch (error) {
         hideElement(loading);
@@ -124,12 +146,30 @@ function handleAnswer(selectedAnswer) {
     hasAnswered = true;
     const isCorrect = selectedAnswer === currentPuzzle.correctAnswer;
 
-    // Disable all buttons
+    // Save result
+    const result = {
+        selectedAnswer: selectedAnswer,
+        correctAnswer: currentPuzzle.correctAnswer,
+        isCorrect: isCorrect
+    };
+
+    // Render completed state
+    renderCompletedState(result);
+
+    // Mark as played and save result
+    savePuzzleResult(currentDate, result);
+}
+
+// Render puzzle in completed state
+function renderCompletedState(savedResult) {
+    const { selectedAnswer, correctAnswer, isCorrect } = savedResult;
+
+    // Disable all buttons and apply styles
     const buttons = optionsContainer.querySelectorAll('.option-btn');
     buttons.forEach(btn => {
         btn.disabled = true;
 
-        if (btn.dataset.answer === currentPuzzle.correctAnswer) {
+        if (btn.dataset.answer === correctAnswer) {
             btn.classList.add('correct');
         } else if (btn.dataset.answer === selectedAnswer) {
             btn.classList.add('wrong');
@@ -140,9 +180,6 @@ function handleAnswer(selectedAnswer) {
 
     // Show result
     showResult(isCorrect);
-
-    // Mark as played
-    markAsPlayed(currentDate);
 }
 
 // Show result message
@@ -161,26 +198,26 @@ function showResult(isCorrect) {
 // LocalStorage functions
 function hasPlayedDate(date) {
     const data = getStorageData();
-    if (!data.playedDates) {
-        data.playedDates = [];
-    }
-    return data.playedDates.includes(date);
+    return data.puzzleResults && data.puzzleResults[date] !== undefined;
 }
 
-function markAsPlayed(date) {
+function savePuzzleResult(date, result) {
     const data = getStorageData();
-    if (!data.playedDates) {
-        data.playedDates = [];
+    if (!data.puzzleResults) {
+        data.puzzleResults = {};
     }
-    if (!data.playedDates.includes(date)) {
-        data.playedDates.push(date);
-    }
+    data.puzzleResults[date] = result;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function getPuzzleResult(date) {
+    const data = getStorageData();
+    return data.puzzleResults ? data.puzzleResults[date] : null;
 }
 
 function getStorageData() {
     const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : { playedDates: [] };
+    return data ? JSON.parse(data) : { puzzleResults: {} };
 }
 
 function getTodayDate() {

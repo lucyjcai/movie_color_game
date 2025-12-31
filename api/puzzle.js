@@ -24,7 +24,9 @@ module.exports = (req, res) => {
 
     // Check if puzzle exists for the requested date
     if (daysSinceStart < 0 || daysSinceStart >= puzzleData.puzzles.length) {
+      print(daysSinceStart)
       return res.status(404).json({
+
         error: 'No puzzle available for this date',
         message: 'Check back soon for a new puzzle!'
       });
