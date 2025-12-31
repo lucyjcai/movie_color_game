@@ -246,6 +246,12 @@ function generateShareText() {
 
     const { guessCount } = savedResult;
 
+    // Calculate puzzle number
+    const startDate = createLocalDate(START_DATE);
+    const currentPuzzleDate = createLocalDate(currentDate);
+    const daysDiff = Math.floor((currentPuzzleDate - startDate) / (1000 * 60 * 60 * 24));
+    const puzzleNumber = daysDiff + 1;
+
     // Generate emoji pattern: red squares for wrong guesses, green for correct
     const wrongGuesses = guessCount - 1;
     const emojiPattern = '🟥'.repeat(wrongGuesses) + '🟩';
@@ -257,7 +263,7 @@ function generateShareText() {
     const dateStr = `${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 
     const guessText = guessCount === 1 ? '1 guess' : `${guessCount} guesses`;
-    return `Gradient - ${dateStr}\n🎬 Got it in ${guessText}!\n${emojiPattern}\n\nPlay at: ${window.location.origin}`;
+    return `Gradient #${puzzleNumber} - ${dateStr}\n🎬 Got it in ${guessText}!\n${emojiPattern}\n\nPlay at: ${window.location.origin}`;
 }
 
 // Copy to clipboard
