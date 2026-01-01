@@ -30,6 +30,16 @@
         "Perfect Days (2023)",
         "Memories of Murder (2003)"
       ]
+    },
+    {
+      "id": 4,
+      "movieTitle": "Mad Max: Fury Road (2015)",
+      "imageFilename": "strip_4.png",
+      "wrongAnswers": [
+        "Dune: Part Two (2024)",
+        "Blade Runner: 2049 (2017)",
+        "Wonder Woman (2017)"
+      ]
     }
   ]
 }

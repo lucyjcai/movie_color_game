@@ -176,6 +176,17 @@ function handleAnswer(selectedAnswer) {
 
         // Mark as played and save result
         savePuzzleResult(currentDate, result);
+
+        // Track completion event
+        if (window.va) {
+            window.va('event', {
+                name: 'puzzle_completed',
+                data: {
+                    guesses: guessCount,
+                    puzzle_date: currentDate
+                }
+            });
+        }
     } else {
         // Wrong answer - show feedback but allow more guesses
         showIncorrectFeedback(selectedAnswer);
@@ -274,6 +285,11 @@ async function copyToClipboard() {
     try {
         await navigator.clipboard.writeText(shareText);
 
+        // Track share event
+        if (window.va) {
+            window.va('event', { name: 'results_copied' });
+        }
+
         // Show visual feedback
         const originalText = copyBtn.textContent;
         copyBtn.textContent = 'Copied!';
@@ -296,6 +312,11 @@ async function shareViaWebAPI() {
         await navigator.share({
             text: shareText
         });
+
+        // Track share event
+        if (window.va) {
+            window.va('event', { name: 'results_shared' });
+        }
     } catch (error) {
         // Silently fail if user cancels share
         console.log('Share cancelled:', error);
@@ -328,7 +349,11 @@ function getStorageData() {
 }
 
 function getTodayDate() {
-    return new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 // Helper function to create date from YYYY-MM-DD string in local timezone
