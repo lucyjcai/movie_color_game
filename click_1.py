@@ -8,7 +8,7 @@ import time
 import sys
 
 first = True
-TARGET_FRAMES = 200
+TARGET_FRAMES = 300
 
 if len(sys.argv) != 3:
     print("Usage: python click_1.py <minutes> <streaming_service>")

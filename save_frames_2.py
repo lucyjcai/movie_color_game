@@ -11,7 +11,7 @@ import sys
 # -------- CONFIG --------
 DOWNLOADS_DIR = Path.home() / "Downloads"
 PREFIX = "VS--"
-MAX_FILES_TO_CHECK = 200
+MAX_FILES_TO_CHECK = 500
 
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".webp"}
 # ------------------------
