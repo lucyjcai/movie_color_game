@@ -43,15 +43,20 @@ def main():
     image_paths = natsorted(
         [p for p in input_dir.iterdir() if p.suffix.lower() in VALID_EXTS]
     )
-    print(image_paths)
+    # print(image_paths)
 
     if not image_paths:
         raise RuntimeError(f"No images found in {input_dir}")
 
     colors = []
-    for p in image_paths:
+    total_images = len(image_paths)
+    print(f"Processing {total_images} images...")
+
+    for i, p in enumerate(image_paths, 1):
         try:
             colors.append(avg_rgb(p))
+            if i % 10 == 0 or i == total_images:
+                print(f"  Processed {i}/{total_images} images ({i*100//total_images}%)")
         except Exception as e:
             print(f"Skipping {p.name} (could not read): {e}")
 

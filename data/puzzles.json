@@ -40,6 +40,16 @@
         "Blade Runner: 2049 (2017)",
         "Wonder Woman (2017)"
       ]
+    },
+    {
+      "id": 5,
+      "movieTitle": "KPop Demon Hunters (2025)",
+      "imageFilename": "strip_5.png",
+      "wrongAnswers": [
+        "Nerve (2016)",
+        "Spiderman: Across the Spider-Verse (2023)",
+        "Turning Red (2022)"
+      ]
     }
   ]
 }
