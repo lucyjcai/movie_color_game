@@ -420,7 +420,11 @@ function generateCalendar() {
         const puzzleDate = new Date(startDate);
         puzzleDate.setDate(startDate.getDate() + i);
 
-        const dateStr = puzzleDate.toISOString().split('T')[0];
+        // Format date in local timezone (not UTC)
+        const year = puzzleDate.getFullYear();
+        const month = String(puzzleDate.getMonth() + 1).padStart(2, '0');
+        const day = String(puzzleDate.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
         const dayElement = document.createElement('button');
         dayElement.classList.add('calendar-day');
 

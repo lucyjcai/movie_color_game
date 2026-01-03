@@ -17,7 +17,7 @@ if len(sys.argv) != 3:
 minutes = float(sys.argv[1])
 service = sys.argv[2]
 min_between_each_frame = minutes / TARGET_FRAMES
-if service not in ["NETFLIX", "HBOMAX"]:
+if service not in ["NETFLIX", "HBOMAX", "DISNEYPLUS"]:
     print("Streaming service not recognized!")
     sys.exit(1)
 
@@ -30,6 +30,11 @@ if service == "NETFLIX":
     Y = 838
     end_time = time.time() + minutes * 60 / 1.5
     time_to_sleep_between_captures = min_between_each_frame*60/1.5-1
+elif service == "DISNEYPLUS":
+    X = 1291
+    Y = 781
+    end_time = time.time() + minutes * 60
+    time_to_sleep_between_captures = min_between_each_frame*60-1
 else:
     X = 1203
     Y = 848
@@ -38,7 +43,7 @@ else:
 
 while time.time() < end_time:
 
-    if service == "NETFLIX":
+    if service == "NETFLIX" or service == "DISNEYPLUS":
         if not first:
             subprocess.run(["cliclick", f"c:{X},{Y-200}"])
             time.sleep(1)
