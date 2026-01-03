@@ -50,6 +50,16 @@
         "Spiderman: Across the Spider-Verse (2023)",
         "Turning Red (2022)"
       ]
+    },
+    {
+      "id": 6,
+      "movieTitle": "Grave of the Fireflies (1988)",
+      "imageFilename": "strip_6.png",
+      "wrongAnswers": [
+        "Spirited Away (2001)",
+        "Howl's Moving Castle (2004)",
+        "Princess Mononoke (1997)"
+      ]
     }
   ]
 }

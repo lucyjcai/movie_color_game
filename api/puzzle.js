@@ -7,26 +7,29 @@ module.exports = (req, res) => {
     const dataPath = path.join(process.cwd(), 'data', 'puzzles.json');
     const puzzleData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 
-    // Get date from query parameter or use today
-    let targetDate;
+    // Get date from query parameter (date is already in YYYY-MM-DD format from frontend)
+    let targetDateStr;
     if (req.query.date) {
-      targetDate = new Date(req.query.date);
-      targetDate.setHours(0, 0, 0, 0);
+      targetDateStr = req.query.date;
     } else {
-      targetDate = new Date();
-      targetDate.setHours(0, 0, 0, 0);
+      // This shouldn't happen, but fallback to today
+      const now = new Date();
+      const year = now.getUTCFullYear();
+      const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(now.getUTCDate()).padStart(2, '0');
+      targetDateStr = `${year}-${month}-${day}`;
     }
 
-    const startDate = new Date(puzzleData.startDate);
-    startDate.setHours(0, 0, 0, 0);
+    // Parse dates as UTC to avoid timezone issues
+    const targetDate = new Date(targetDateStr + 'T00:00:00Z');
+    const startDate = new Date(puzzleData.startDate + 'T00:00:00Z');
 
     const daysSinceStart = Math.floor((targetDate - startDate) / (1000 * 60 * 60 * 24));
 
     // Check if puzzle exists for the requested date
     if (daysSinceStart < 0 || daysSinceStart >= puzzleData.puzzles.length) {
-      print(daysSinceStart)
+      console.log('Puzzle not found. Days since start:', daysSinceStart);
       return res.status(404).json({
-
         error: 'No puzzle available for this date',
         message: 'Check back soon for a new puzzle!'
       });
